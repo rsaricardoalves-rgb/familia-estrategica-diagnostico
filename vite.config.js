@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Diagnóstico Família Estratégica — Descubra se sua família está sendo construída com direção ou vivendo no improviso." />
+    <meta property="og:title" content="Diagnóstico Família Estratégica" />
+    <meta property="og:description" content="10 perguntas que revelam se sua família tem estrutura ou está no improviso." />
+    <meta property="og:image" content="/og-image.png" />
+    <title>Diagnóstico — Família Estratégica</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

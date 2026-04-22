@@ -1,0 +1,420 @@
+import { useState } from "react";
+
+const S = {
+  navy: "#0F1D35",
+  navyLight: "#162340",
+  navyCard: "#1A2B47",
+  gold: "#C9A84C",
+  goldLight: "#E2C47A",
+  goldPale: "#F5EDD4",
+  white: "#FFFFFF",
+  offWhite: "#F0EDE6",
+  muted: "#8A9BB8",
+  border: "#2A3F62",
+  red: "#C0392B",
+};
+
+const QUESTIONS = [
+  "Você sabe exatamente quanto custa manter sua família todos os meses?",
+  "Você e seu cônjuge conversam com clareza sobre dinheiro e decisões importantes?",
+  "Sua família possui algum tipo de organização financeira ativa (mesmo que simples)?",
+  "Existe um plano claro para o futuro (filhos, patrimônio, segurança)?",
+  "Você sente que as decisões financeiras são tomadas com consciência — e não no impulso?",
+  "Sua família teria estabilidade por alguns meses se a renda principal parasse hoje?",
+  "Vocês já pararam para discutir, de verdade, que tipo de vida querem construir como família?",
+  "Existe algum tipo de acompanhamento das finanças ao longo do mês (não apenas no final)?",
+  "Você sente que sua família está avançando — e não apenas mantendo o padrão?",
+  "Você acredita que sua família está sendo construída com intenção, e não no automático?",
+];
+
+const RESULTS = [
+  {
+    range: "0 a 3",
+    label: "FAMÍLIA NO IMPROVISO",
+    emoji: "⚠️",
+    color: "#C0392B",
+    bg: "rgba(192,57,43,0.12)",
+    border: "rgba(192,57,43,0.3)",
+    text: "Sua família está operando em modo de sobrevivência, mesmo que a sua renda seja alta. O risco aqui não é a falta de dinheiro, mas o esgotamento silencioso e a ausência de um teto anti-caos. Sem estrutura, o seu esforço está sendo drenado pelo acaso.",
+    cta: "É hora de dar o primeiro passo. Sua família merece mais do que sobreviver.",
+  },
+  {
+    range: "4 a 7",
+    label: "FAMÍLIA EM TRANSIÇÃO",
+    emoji: "🔄",
+    color: "#C9A84C",
+    bg: "rgba(201,168,76,0.12)",
+    border: "rgba(201,168,76,0.3)",
+    text: "Você já percebeu que o improviso cobra um preço alto e começou a se movimentar. Existe intenção, mas ainda falta consistência e um sistema claro. Você está no caminho, mas precisa de ferramentas para não voltar ao automático.",
+    cta: "Você está no caminho certo. Agora é hora de consolidar a estrutura.",
+  },
+  {
+    range: "8 a 10",
+    label: "FAMÍLIA ESTRUTURADA",
+    emoji: "🏆",
+    color: "#27AE60",
+    bg: "rgba(39,174,96,0.12)",
+    border: "rgba(39,174,96,0.3)",
+    text: "Sua família já opera com consciência e governança. O próximo passo agora é a evolução estratégica: blindar o patrimônio e garantir que o legado geracional seja sólido e inabalável.",
+    cta: "Parabéns! Você já saiu do improviso. Agora é hora de escalar o legado.",
+  },
+];
+
+const getResult = (score) => {
+  if (score <= 3) return RESULTS[0];
+  if (score <= 7) return RESULTS[1];
+  return RESULTS[2];
+};
+
+const StarIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill={S.gold}>
+    <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+  </svg>
+);
+
+const TreeLogo = () => (
+  <div style={{ textAlign: "center", marginBottom: 8 }}>
+    <div style={{ width: 70, height: 70, borderRadius: "50%", border: `2px solid ${S.gold}`, margin: "0 auto 8px", display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(201,168,76,0.08)", fontSize: 32 }}>🌳</div>
+    <div style={{ fontFamily: "'Trajan Pro', 'Times New Roman', serif", fontSize: 11, color: S.gold, letterSpacing: 3, fontWeight: 700, textTransform: "uppercase" }}>FAMÍLIA</div>
+    <div style={{ fontFamily: "'Trajan Pro', 'Times New Roman', serif", fontSize: 9, color: S.gold, letterSpacing: 3, fontWeight: 600, textTransform: "uppercase" }}>ESTRATÉGICA</div>
+  </div>
+);
+
+const GoldDivider = () => (
+  <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "20px 0" }}>
+    <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent, ${S.gold}80, transparent)` }}></div>
+    <StarIcon />
+    <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent, ${S.gold}80, transparent)` }}></div>
+  </div>
+);
+
+export default function DiagnosticoFamiliaEstrategica() {
+  const [screen, setScreen] = useState("welcome");
+  const [current, setCurrent] = useState(0);
+  const [answers, setAnswers] = useState(Array(10).fill(null));
+  const [email, setEmail] = useState("");
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [animDir, setAnimDir] = useState("in");
+
+  const score = answers.filter(a => a === true).length;
+  const result = getResult(score);
+  const answered = answers[current] !== null;
+
+  const handleAnswer = (val) => {
+    const next = [...answers];
+    next[current] = val;
+    setAnswers(next);
+  };
+
+  const goNext = () => {
+    if (current < 9) {
+      setAnimDir("out");
+      setTimeout(() => { setCurrent(c => c + 1); setAnimDir("in"); }, 180);
+    } else {
+      setScreen("result");
+    }
+  };
+
+  const goPrev = () => {
+    if (current > 0) {
+      setAnimDir("out");
+      setTimeout(() => { setCurrent(c => c - 1); setAnimDir("in"); }, 180);
+    }
+  };
+
+  const handleEmailSubmit = () => {
+    if (!email || !email.includes("@")) return;
+    setEmailSubmitted(true);
+    console.log("Email capturado:", email, "Score:", score, "Resultado:", result.label);
+  };
+
+  const reset = () => {
+    setScreen("welcome");
+    setCurrent(0);
+    setAnswers(Array(10).fill(null));
+    setEmail("");
+    setEmailSubmitted(false);
+  };
+
+  /* ── WELCOME ─────────────────────────────────────────────── */
+  if (screen === "welcome") return (
+    <div style={{ minHeight: "100vh", background: S.navy, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'DM Sans', Arial, sans-serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes glow { 0%,100% { box-shadow: 0 0 20px rgba(201,168,76,0.2); } 50% { box-shadow: 0 0 40px rgba(201,168,76,0.4); } }
+        .welcome-card { animation: fadeUp 0.6s ease both; }
+        .welcome-card-1 { animation: fadeUp 0.6s 0.1s ease both; }
+        .welcome-card-2 { animation: fadeUp 0.6s 0.2s ease both; }
+        .welcome-card-3 { animation: fadeUp 0.6s 0.3s ease both; }
+        .welcome-card-4 { animation: fadeUp 0.6s 0.4s ease both; }
+        .btn-gold { background: linear-gradient(135deg, #C9A84C, #E2C47A); color: #0F1D35; border: none; border-radius: 8px; padding: 18px 40px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', Arial; width: 100%; letter-spacing: 0.5px; transition: all 0.2s; animation: glow 3s infinite; }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(201,168,76,0.35); }
+      `}</style>
+      <div style={{ maxWidth: 560, width: "100%" }}>
+        <div className="welcome-card" style={{ textAlign: "center", marginBottom: 32 }}>
+          <TreeLogo />
+        </div>
+        <div className="welcome-card-1" style={{ border: `1px solid ${S.border}`, borderRadius: 16, background: S.navyCard, padding: "32px 28px", marginBottom: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent, ${S.gold})` }}></div>
+            <span style={{ color: S.gold, fontSize: 13, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase" }}>Diagnóstico</span>
+            <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${S.gold}, transparent)` }}></div>
+          </div>
+          <h1 style={{ fontSize: 30, fontWeight: 800, color: S.white, lineHeight: 1.15, marginBottom: 16, letterSpacing: -0.5 }}>
+            Diagnóstico da<br />
+            <span style={{ color: S.gold }}>Família Estratégica</span>
+          </h1>
+          <p style={{ fontSize: 15, color: S.offWhite, lineHeight: 1.75, marginBottom: 12 }}>
+            Descubra se sua família está sendo construída com <strong style={{ color: S.gold }}>direção...</strong> ou vivendo no <strong style={{ color: S.gold }}>improviso.</strong>
+          </p>
+          <GoldDivider />
+          <p style={{ fontSize: 14, color: "#8A9BB8", lineHeight: 1.7 }}>
+            Você trabalha. Se dedica. Dá o sangue pela sua família.<br /><br />
+            Mas, mesmo assim, existe uma <strong style={{ color: S.white }}>sensação silenciosa</strong> que te acompanha:<br />
+            <em style={{ color: S.gold }}>"Estamos realmente construindo algo... ou só sobrevivendo ao mês?"</em>
+          </p>
+        </div>
+        <div className="welcome-card-2" style={{ background: "rgba(201,168,76,0.06)", border: `1px solid rgba(201,168,76,0.2)`, borderRadius: 12, padding: "16px 20px", marginBottom: 16, display: "flex", gap: 12, alignItems: "flex-start" }}>
+          <span style={{ fontSize: 20 }}>💡</span>
+          <div>
+            <p style={{ fontSize: 13, color: S.gold, fontWeight: 700, marginBottom: 4 }}>A maioria das famílias não falha por falta de esforço.</p>
+            <p style={{ fontSize: 13, color: "#8A9BB8", lineHeight: 1.6 }}>Falha por falta de <strong style={{ color: S.white }}>estrutura.</strong> Este diagnóstico não é um julgamento. É o seu primeiro passo para a <strong style={{ color: S.gold }}>clareza.</strong></p>
+          </div>
+        </div>
+        <div className="welcome-card-3" style={{ display: "flex", gap: 20, marginBottom: 24, justifyContent: "center" }}>
+          {[["10", "perguntas"], ["2 min", "de duração"], ["100%", "honesto"]].map(([v, l]) => (
+            <div key={l} style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 20, fontWeight: 800, color: S.gold }}>{v}</div>
+              <div style={{ fontSize: 11, color: S.muted, fontWeight: 500 }}>{l}</div>
+            </div>
+          ))}
+        </div>
+        <div className="welcome-card-4">
+          <button className="btn-gold" onClick={() => setScreen("quiz")}>
+            Iniciar meu diagnóstico →
+          </button>
+          <p style={{ textAlign: "center", marginTop: 12, fontSize: 12, color: S.muted }}>Responda com 100% de honestidade consigo mesmo.</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ── QUIZ ─────────────────────────────────────────────────── */
+  if (screen === "quiz") return (
+    <div style={{ minHeight: "100vh", background: S.navy, display: "flex", flexDirection: "column", fontFamily: "'DM Sans', Arial, sans-serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeOut { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(-12px); } }
+        .q-in { animation: fadeIn 0.25s ease both; }
+        .q-out { animation: fadeOut 0.18s ease both; }
+        .yes-btn { flex:1; padding: 18px 12px; border-radius: 10px; border: 2px solid; border-color: ${answers[current] === true ? '#27AE60' : S.border}; background: ${answers[current] === true ? 'rgba(39,174,96,0.15)' : S.navyCard}; color: ${answers[current] === true ? '#27AE60' : S.offWhite}; font-size: 16px; font-weight: 700; cursor: pointer; font-family: 'DM Sans'; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .yes-btn:hover { border-color: #27AE60; background: rgba(39,174,96,0.1); color: #27AE60; }
+        .no-btn { flex:1; padding: 18px 12px; border-radius: 10px; border: 2px solid; border-color: ${answers[current] === false ? '#C0392B' : S.border}; background: ${answers[current] === false ? 'rgba(192,57,43,0.15)' : S.navyCard}; color: ${answers[current] === false ? '#C0392B' : S.offWhite}; font-size: 16px; font-weight: 700; cursor: pointer; font-family: 'DM Sans'; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .no-btn:hover { border-color: #C0392B; background: rgba(192,57,43,0.1); color: #C0392B; }
+        .btn-next { background: linear-gradient(135deg, #C9A84C, #E2C47A); color: #0F1D35; border: none; border-radius: 8px; padding: 16px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'DM Sans'; width: 100%; transition: all 0.2s; }
+        .btn-next:disabled { background: #1A2B47; color: #3A4F72; cursor: not-allowed; }
+        .btn-next:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(201,168,76,0.3); }
+        .btn-back { background: transparent; border: 1px solid ${S.border}; border-radius: 8px; padding: 16px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans'; color: ${S.muted}; transition: all 0.15s; }
+        .btn-back:hover { border-color: ${S.gold}; color: ${S.gold}; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; transition: all 0.3s; cursor: pointer; flex-shrink: 0; }
+      `}</style>
+
+      <div style={{ background: S.navyLight, borderBottom: `1px solid ${S.border}`, padding: "14px 24px", flexShrink: 0 }}>
+        <div style={{ maxWidth: 600, margin: "0 auto" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 16 }}>🌳</span>
+              <span style={{ color: S.gold, fontSize: 13, fontWeight: 700, letterSpacing: 1 }}>FAMÍLIA ESTRATÉGICA</span>
+            </div>
+            <span style={{ fontSize: 13, color: S.muted, fontWeight: 600 }}>
+              {current + 1}<span style={{ color: S.border }}> / 10</span>
+            </span>
+          </div>
+          <div style={{ height: 4, background: S.border, borderRadius: 10, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${((current + (answered ? 1 : 0)) / 10) * 100}%`, background: `linear-gradient(90deg, ${S.gold}, ${S.goldLight})`, borderRadius: 10, transition: "width 0.4s ease" }}></div>
+          </div>
+          <div style={{ display: "flex", gap: 4, marginTop: 8, justifyContent: "center" }}>
+            {QUESTIONS.map((_, i) => (
+              <div key={i} className="dot" style={{ background: answers[i] === true ? "#27AE60" : answers[i] === false ? "#C0392B" : i === current ? S.gold : S.border, width: i === current ? 20 : 8, borderRadius: i === current ? 4 : "50%" }} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "32px 24px" }}>
+        <div style={{ maxWidth: 600, width: "100%" }}>
+          <div className={animDir === "in" ? "q-in" : "q-out"} key={current}>
+            <div style={{ background: S.navyCard, border: `1px solid ${S.border}`, borderRadius: 16, padding: "32px 28px", marginBottom: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: `linear-gradient(135deg, ${S.gold}, ${S.goldLight})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <span style={{ color: S.navy, fontWeight: 800, fontSize: 15 }}>{current + 1}</span>
+                </div>
+                <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${S.gold}60, transparent)` }}></div>
+              </div>
+              <h2 style={{ fontSize: 22, fontWeight: 700, color: S.white, lineHeight: 1.35, letterSpacing: -0.3 }}>
+                {QUESTIONS[current]}
+              </h2>
+            </div>
+
+            <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
+              <button className="yes-btn" onClick={() => handleAnswer(true)}>
+                {answers[current] === true && <span>✓</span>}
+                SIM
+              </button>
+              <button className="no-btn" onClick={() => handleAnswer(false)}>
+                {answers[current] === false && <span>✗</span>}
+                NÃO
+              </button>
+            </div>
+
+            {answers[current] !== null && (
+              <div style={{ background: answers[current] ? "rgba(39,174,96,0.08)" : "rgba(192,57,43,0.08)", border: `1px solid ${answers[current] ? "rgba(39,174,96,0.2)" : "rgba(192,57,43,0.2)"}`, borderRadius: 10, padding: "12px 16px", marginBottom: 20, animation: "fadeIn 0.3s ease" }}>
+                <p style={{ fontSize: 13, color: answers[current] ? "#5DB87A" : "#E07070", margin: 0 }}>
+                  {answers[current]
+                    ? "✓ Ótimo! Isso é um ponto de estrutura na sua família."
+                    : "Honestidade é o primeiro passo. Identificar o gap é o que permite mudá-lo."}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: "flex", gap: 10 }}>
+            {current > 0 && <button className="btn-back" onClick={goPrev} style={{ flex: 1 }}>← Anterior</button>}
+            <button className="btn-next" onClick={goNext} disabled={!answered} style={{ flex: current > 0 ? 2 : 1 }}>
+              {current === 9 ? "Ver meu resultado →" : "Próxima →"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ── RESULT ───────────────────────────────────────────────── */
+  return (
+    <div style={{ minHeight: "100vh", background: S.navy, fontFamily: "'DM Sans', Arial, sans-serif", padding: "32px 24px 60px" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes pulseGold { 0%,100% { box-shadow:0 0 0 0 rgba(201,168,76,0.4); } 70% { box-shadow:0 0 0 16px rgba(201,168,76,0); } }
+        .r1 { animation: fadeUp 0.5s 0.0s ease both; }
+        .r2 { animation: fadeUp 0.5s 0.1s ease both; }
+        .r3 { animation: fadeUp 0.5s 0.2s ease both; }
+        .r4 { animation: fadeUp 0.5s 0.3s ease both; }
+        .r5 { animation: fadeUp 0.5s 0.4s ease both; }
+        .btn-gold-full { background: linear-gradient(135deg, #C9A84C, #E2C47A); color: #0F1D35; border: none; border-radius: 8px; padding: 18px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: 'DM Sans'; width: 100%; transition: all 0.2s; }
+        .btn-gold-full:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(201,168,76,0.35); }
+        .btn-outline { background: transparent; border: 1px solid ${S.border}; border-radius: 8px; padding: 14px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans'; color: ${S.muted}; width: 100%; transition: all 0.15s; }
+        .btn-outline:hover { border-color: ${S.gold}; color: ${S.gold}; }
+        .email-input { width: 100%; padding: 16px 20px; border-radius: 8px; border: 2px solid ${S.border}; background: ${S.navyCard}; color: ${S.white}; font-size: 15px; font-family: 'DM Sans'; outline: none; transition: border 0.2s; box-sizing: border-box; }
+        .email-input::placeholder { color: #3A4F72; }
+        .email-input:focus { border-color: ${S.gold}; }
+      `}</style>
+
+      <div style={{ maxWidth: 580, margin: "0 auto" }}>
+        <div className="r1" style={{ textAlign: "center", marginBottom: 24 }}>
+          <TreeLogo />
+        </div>
+
+        <div className="r1" style={{ textAlign: "center", marginBottom: 24 }}>
+          <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+            <div style={{ width: 80, height: 80, borderRadius: "50%", background: `linear-gradient(135deg, ${result.color}30, ${result.color}10)`, border: `3px solid ${result.color}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", animation: "pulseGold 2s 3" }}>
+              <span style={{ fontSize: 28, fontWeight: 800, color: result.color }}>{score}</span>
+              <span style={{ fontSize: 10, color: S.muted, fontWeight: 500 }}>de 10</span>
+            </div>
+            <span style={{ fontSize: 12, color: S.muted, marginTop: 4 }}>{score} SIM · {10 - score} NÃO</span>
+          </div>
+        </div>
+
+        <div className="r2" style={{ background: result.bg, border: `1px solid ${result.border}`, borderRadius: 16, padding: "28px 24px", marginBottom: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+            <span style={{ fontSize: 32 }}>{result.emoji}</span>
+            <div>
+              <p style={{ fontSize: 11, color: result.color, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", marginBottom: 2 }}>{result.range} SIM</p>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: S.white, letterSpacing: -0.3 }}>{result.label}</h2>
+            </div>
+          </div>
+          <GoldDivider />
+          <p style={{ fontSize: 15, color: S.offWhite, lineHeight: 1.75 }}>{result.text}</p>
+        </div>
+
+        <div className="r3" style={{ background: S.navyCard, border: `1px solid ${S.border}`, borderRadius: 14, padding: "20px 20px", marginBottom: 16 }}>
+          <p style={{ fontSize: 12, color: S.gold, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 14 }}>Seu resultado detalhado</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {QUESTIONS.map((q, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                <div style={{ width: 22, height: 22, borderRadius: 6, background: answers[i] ? "rgba(39,174,96,0.2)" : "rgba(192,57,43,0.2)", border: `1px solid ${answers[i] ? "rgba(39,174,96,0.4)" : "rgba(192,57,43,0.4)"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
+                  <span style={{ fontSize: 11, color: answers[i] ? "#5DB87A" : "#E07070", fontWeight: 800 }}>{answers[i] ? "S" : "N"}</span>
+                </div>
+                <p style={{ fontSize: 12, color: answers[i] ? "#8ABFA0" : "#A08080", lineHeight: 1.5, margin: 0 }}>{q}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="r3" style={{ background: "rgba(201,168,76,0.06)", border: `1px solid rgba(201,168,76,0.2)`, borderRadius: 14, padding: "20px 20px", marginBottom: 20 }}>
+          <p style={{ fontSize: 13, color: S.gold, fontWeight: 700, marginBottom: 10 }}>✦ Reflexão Final</p>
+          <p style={{ fontSize: 14, color: S.offWhite, lineHeight: 1.75, marginBottom: 10 }}>
+            Existe um momento em que toda família precisa decidir: <strong style={{ color: S.gold }}>Continuar no automático...</strong> ou <strong style={{ color: S.gold }}>assumir o controle da própria construção.</strong>
+          </p>
+          <p style={{ fontSize: 14, color: "#8A9BB8", lineHeight: 1.7 }}>
+            O futuro de uma família não acontece por acaso. <strong style={{ color: S.white }}>Ele é governado.</strong>
+          </p>
+        </div>
+
+        <div className="r4" style={{ background: S.navyCard, border: `1px solid ${S.border}`, borderRadius: 16, padding: "24px", marginBottom: 16 }}>
+          {!emailSubmitted ? (
+            <>
+              <p style={{ fontSize: 14, color: S.gold, fontWeight: 700, marginBottom: 6 }}>📩 Receba ferramentas práticas</p>
+              <p style={{ fontSize: 13, color: S.muted, lineHeight: 1.6, marginBottom: 16 }}>
+                Deixe seu e-mail e receba conteúdos exclusivos para tirar sua família do improviso e construir com estrutura.
+              </p>
+              <input
+                type="email"
+                className="email-input"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="seu@melhor.email"
+                style={{ marginBottom: 12 }}
+                onKeyDown={e => e.key === "Enter" && handleEmailSubmit()}
+              />
+              <button className="btn-gold-full" onClick={handleEmailSubmit}>
+                Quero as ferramentas práticas →
+              </button>
+              <p style={{ textAlign: "center", fontSize: 11, color: S.muted, marginTop: 10 }}>Sem spam. Apenas conteúdo que transforma famílias.</p>
+            </>
+          ) : (
+            <div style={{ textAlign: "center", padding: "8px 0" }}>
+              <div style={{ fontSize: 36, marginBottom: 12 }}>✅</div>
+              <p style={{ fontSize: 16, fontWeight: 700, color: S.gold, marginBottom: 6 }}>Perfeito! E-mail confirmado.</p>
+              <p style={{ fontSize: 13, color: S.muted, lineHeight: 1.6 }}>
+                Em breve você receberá ferramentas práticas para construir uma família com mais estrutura e intenção.
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="r4" style={{ background: "linear-gradient(135deg, #1A2B47, #0F1D35)", border: `1px solid ${S.gold}40`, borderRadius: 14, padding: "20px", marginBottom: 16, textAlign: "center" }}>
+          <p style={{ fontSize: 13, color: S.offWhite, lineHeight: 1.7, marginBottom: 12 }}>
+            Siga o perfil <strong style={{ color: S.gold }}>@familiaestrategica.oficial</strong> para receber as ferramentas práticas que vão tirar sua família do improviso.
+          </p>
+          <button className="btn-gold-full" onClick={() => window.open("https://instagram.com/familiaestrategica.oficial", "_blank")}>
+            Seguir no Instagram ✦
+          </button>
+        </div>
+
+        <div className="r5" style={{ textAlign: "center", marginBottom: 20 }}>
+          <p style={{ fontSize: 13, color: S.muted, fontStyle: "italic" }}>Família Estratégica — Menos Improviso. Mais Estrutura.</p>
+        </div>
+
+        <div className="r5">
+          <button className="btn-outline" onClick={reset}>↺ Refazer o diagnóstico</button>
+        </div>
+      </div>
+    </div>
+  );
+}
